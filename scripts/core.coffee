@@ -101,8 +101,17 @@ exports = module.exports =
                 cb($)
 
     savefile: ( name, data)->
-        fs.writeFile './data/'+name+'.html', data, (err)->
+        path = './data/'+name+'.html'
+        fs.writeFile path, data, (err)->
             if err
                 console.log 'err = ', err
             else
-                console.log 'saved file '+name+'.html'
+                console.log 'saved file ', path
+
+    savefileJSON: ( name, data)->
+        path = './data/'+name+'.json'
+        fs.writeFile path, JSON.stringify(data, null, 4), (err)->
+            if err
+                console.log 'err = ', err
+            else
+                console.log 'saved file ', path

@@ -107,19 +107,20 @@ exports = module.exports =
     rootURL: '/purchasing/compare/fan.asp'
 
     init: (options = { source: 'file' })->
-        @getHTTPFromArray
-            url: core.baseURL + @rootURL
-            body: @data[9]
-        , (result)->
-            console.log 'result = ', result
-        # for i in @data
-        #     @getHTTPFromArray
-        #         url: core.baseURL + '/purchasing/compare/fan.asp'
-        #         body: i
-        #     , ($)->
-        #         console.log '$ = ', $.html()
+        if source is 'file'
+            for i in @data
+                @getFileFromArray
+                    path: options.path
+                , (result)->
+                    console.log 'result = ', result
+        else
+            for i in @data
+                @getHTTPFromArray
+                    url: core.baseURL + @rootURL
+                    body: i
+                , (result)->
+                    console.log 'result = ', result
 
-        #         process.exit(1)
 
     getHTTPFromArray: ( options = { url: core.baseURL + @rootURL, body: '' }, cb)->
         core.getHtmlForm
@@ -157,25 +158,8 @@ exports = module.exports =
                             h = header[index%header.length]
                             tmp[h] = $(item).text()
 
+                    # save file
+                    savefileJSON 'fan'
+
                     # callback
                     cb(result)
-
-
-
-
-# core.getFileHtml './1371999790466_fan.html', ($)->
-# for i in fanData
-    # core.getHtmlForm
-    #     url: core.baseURL + '/purchasing/compare/fan.asp'
-    #     body: i
-    # , ($form)->
-    #     $form('form').each (index, item)->
-    #         console.log 'index', index
-    #         # console.log 'item = ', item
-    #         if $(item).attr('action').indexOf('/purchasing/compare/fan.asp') > 0
-    #             console.log '-------------> ', $(item).html()
-
-# core.getFileHtml './data/1372245373624_fan_?S1=55&subtype=30&sizecode=30.html', ($)->
-#     $('form').each (index, item)->
-#         if $(item).attr('action').indexOf('/purchasing/compare/fan.asp') >= 0
-#             console.log '-------------> ', $(item).html()
