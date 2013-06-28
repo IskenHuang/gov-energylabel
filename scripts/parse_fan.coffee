@@ -1,5 +1,4 @@
 core = require('./core')
-cheerio = require('cheerio')
 # parse FAN.html
 
 # form type:
