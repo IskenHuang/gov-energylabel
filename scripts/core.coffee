@@ -9,7 +9,9 @@ exports = module.exports =
 
     targetURL: @baseURL+'purchasing/compare/list.asp'
 
-    getHtml: (url, cb)->
+    rootURL: '/purchasing/compare/fan.asp'
+
+    getHtml: (url, cb, isSave = false)->
         request
             url: url
             encoding: 'binary'
@@ -20,10 +22,10 @@ exports = module.exports =
 
                 $ = cheerio.load(_html)
 
-                tmpArray = url.split('/')
-                fn = tmpArray[tmpArray.length-1].split('.')[0]
-
-                @savefile(new Date().getTime()+'_'+fn, _html)
+                if isSave
+                    tmpArray = url.split('/')
+                    fn = tmpArray[tmpArray.length-1].split('.')[0]
+                    @savefile(new Date().getTime()+'_'+fn, _html)
 
                 cb($)
             else
@@ -58,7 +60,7 @@ exports = module.exports =
 
         return _array;
 
-    getHtmlForm: (options = { url: '', body: {} }, cb)->
+    getHtmlForm: (options = { url: '', body: {} }, cb, isSave = false)->
         options.headers =
             'content-type': 'application/x-www-form-urlencoded'
 
@@ -75,10 +77,11 @@ exports = module.exports =
                 _html = iconv.decode( _buf, 'big5')
                 $ = cheerio.load(_html)
 
-                tmpArray = options.url.split('/')
-                fn = tmpArray[tmpArray.length-1].split('.')[0]
+                if isSave
+                    tmpArray = options.url.split('/')
+                    fn = tmpArray[tmpArray.length-1].split('.')[0]
+                    @savefile(new Date().getTime()+'_'+fn+'_'+_body, _html)
 
-                @savefile(new Date().getTime()+'_'+fn+'_'+_body, _html)
                 cb($)
 
             else
@@ -115,3 +118,78 @@ exports = module.exports =
                 console.log 'err = ', err
             else
                 console.log 'saved file ', path
+    getHTTPFromArray: ( options = { url: @rootURL, body: '' }, cb)->
+        @getHtmlForm
+            url: @baseURL + options.url
+            body: options.body
+        , ($)=>
+            # reset @rootURL
+            @rootURL = options.url
+
+            @getFormHtml $, (result)->
+                console.log 'getFormHtml = ', result
+                cb(result)
+
+    getFileFromArray: ( options = { path: '' }, cb)->
+        unless options.path
+            console.log 'getFileFromArray: file path error'
+            return
+
+        core.getFileHtml options.path, ($)=>
+            @getFormHtml $, (result)->
+                cb(result)
+
+    getFormHtml: ($, cb)->
+        $('form').each (index, item)=>
+            if $(item).attr('action').indexOf(@rootURL+'?') >= 0
+                header = []
+                result = []
+
+                $(item).find('table').each (index, item)=>
+                    _index = index
+                    tmp = {}
+
+                    $(item).find('td').each ( index, item)=>
+                        if _index is 0
+                            header.push $(item).text()
+                        else
+                            if index%header.length is 0 and index isnt 0
+                                # append object to result array
+                                result.push tmp
+                                tmp = {}
+
+                            # set header and value to object
+                            h = header[index%header.length]
+                            tmp[h] = $(item).text()
+
+                    # save file when file is not null
+                    if result.length
+                        _t = @rootURL.split('/')
+                        _n = new Date().getTime() + '_'
+                        _n += _t[_t.length-1].replace('.asp', '')
+                        @savefileJSON _n, result
+
+                    # callback
+                    cb(result)
+
+    clone: (obj) ->
+        if not obj? or typeof obj isnt 'object'
+            return obj
+
+        if obj instanceof Date
+            return new Date(obj.getTime())
+
+        if obj instanceof RegExp
+            flags = ''
+            flags += 'g' if obj.global?
+            flags += 'i' if obj.ignoreCase?
+            flags += 'm' if obj.multiline?
+            flags += 'y' if obj.sticky?
+            return new RegExp(obj.source, flags)
+
+        newInstance = new obj.constructor()
+
+        for key of obj
+            newInstance[key] = @clone obj[key]
+
+        return newInstance

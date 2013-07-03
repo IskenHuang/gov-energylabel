@@ -1,4 +1,8 @@
 fan = require('./parse_fan')
+airConditioning = require('./parse_airConditioning')
 
 # parse fan
-fan.init()
+fan.parse()
+
+# parse air conditioning
+# airConditioning.parse()
