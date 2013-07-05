@@ -1,28 +1,27 @@
 core = require('./core')
 
 # form type:
-#     washer:
+#     S1:
 # form url:
-#     '/purchasing/compare/clothes_washer.asp'
+#     '/purchasing/compare/hair_dryer.asp'
 
-# washer
-# 洗衣容量
-# 1. 小於10公斤
-# 2. 10~13公斤
-# 3. 14公斤以上
-# [1..3]
+# S1
+# 吹風機口徑
+# 1. 50mm
+# 2. >=50mm
+# [1..2]
 
 exports = module.exports =
 
     getData: ->
         _data = []
-        for i in [1..3]
+        for i in [1, 2]
             _data.push
-                washer: i
+                S1: i
 
         return _data
 
-    rootURL: '/purchasing/compare/clothes_washer.asp'
+    rootURL: '/purchasing/compare/hair_dryer.asp'
 
     parse: (options = { source: 'http' })->
         if options.source is 'file'

@@ -1,28 +1,39 @@
 core = require('./core')
 
 # form type:
-#     washer:
+#     S1:
+#     S2:
 # form url:
-#     '/purchasing/compare/clothes_washer.asp'
+#     '/purchasing/compare/fluor_light.asp'
 
-# washer
-# 洗衣容量
-# 1. 小於10公斤
-# 2. 10~13公斤
-# 3. 14公斤以上
-# [1..3]
+# S1
+# 螢光燈管瓦數
+# 1. 10W
+# 2. >11~15W
+# 3. >16~20W
+# 4. >21~30W
+# 5. =31W
+# [1..5]
+
+# S2
+# 色溫範圍
+# 1. 5700~7100K
+# 2. 4600~5400K
+# 3. 2600~4500K
 
 exports = module.exports =
 
     getData: ->
         _data = []
-        for i in [1..3]
-            _data.push
-                washer: i
+        for i in [1..5]
+            for j in [1..3]
+                _data.push
+                    S1: i
+                    S2: j
 
         return _data
 
-    rootURL: '/purchasing/compare/clothes_washer.asp'
+    rootURL: '/purchasing/compare/fluor_light.asp'
 
     parse: (options = { source: 'http' })->
         if options.source is 'file'

@@ -127,7 +127,6 @@ exports = module.exports =
             @rootURL = options.url
 
             @getFormHtml $, (result)->
-                console.log 'getFormHtml = ', result
                 cb(result)
 
     getFileFromArray: ( options = { path: '' }, cb)->
@@ -139,31 +138,37 @@ exports = module.exports =
             @getFormHtml $, (result)->
                 cb(result)
 
-    getFormHtml: ($, cb)->
+    getFormHtml: ($, cb, isSave = false)->
         $('form').each (index, item)=>
             if $(item).attr('action').indexOf(@rootURL+'?') >= 0
                 header = []
                 result = []
 
                 $(item).find('table').each (index, item)=>
-                    _index = index
-                    tmp = {}
 
-                    $(item).find('td').each ( index, item)=>
-                        if _index is 0
-                            header.push $(item).text()
+                    $(item).find('tr').each ( index, item) =>
+                        if index is 0
+                            isHeader = true
                         else
-                            if index%header.length is 0 and index isnt 0
-                                # append object to result array
-                                result.push tmp
-                                tmp = {}
+                            # content row
+                            isHeader = false
+                            tmp = {}
 
-                            # set header and value to object
-                            h = header[index%header.length]
-                            tmp[h] = $(item).text()
+                        $(item).find('td').each ( index, item)=>
+                            if isHeader
+                                header.push $(item).text()
+                            else
+                                # set header and value to object
+                                h = header[index]
+                                tmp[h] = $(item).text()
+
+                        # if isn't header
+                        unless isHeader
+                            result.push tmp
+
 
                     # save file when file is not null
-                    if result.length
+                    if result.length > 0 and isSave
                         _t = @rootURL.split('/')
                         _n = new Date().getTime() + '_'
                         _n += _t[_t.length-1].replace('.asp', '')
