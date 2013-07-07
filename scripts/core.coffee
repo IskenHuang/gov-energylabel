@@ -145,7 +145,6 @@ exports = module.exports =
                 result = []
 
                 $(item).find('table').each (index, item)=>
-
                     $(item).find('tr').each ( index, item) =>
                         if index is 0
                             isHeader = true
